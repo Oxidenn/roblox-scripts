@@ -1,351 +1,88 @@
--- 🚀 Space Admin Panel | Executor Script
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
--- État des features
-local states = {
-    fly = false,
-    speed = false,
-    noclip = false,
-    inf_jump = false,
-    esp = false,
-    fullbright = false,
-    freecam = false,
-}
+-- Nettoyer ancien GUI
+local oldGui = LocalPlayer.PlayerGui:FindFirstChild("SpaceAdmin")
+if oldGui then oldGui:Destroy() end
 
--- ScreenGui
+-- Variables features
+local flyConn, noclipConn, jumpConn, espConn, rainbowConn, toupieConn, moonwalkConn
+
+-- GUI
 local gui = Instance.new("ScreenGui")
 gui.Name = "SpaceAdmin"
 gui.ResetOnSpawn = false
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
--- Main Frame
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 340, 0, 520)
-main.Position = UDim2.new(0.5, -170, 0.5, -260)
-main.BackgroundColor3 = Color3.fromRGB(5, 5, 20)
-main.BorderSizePixel = 0
+main.Name = "MainFrame"
+main.Size = UDim2.new(0, 270, 0, 320)
+main.Position = UDim2.new(0.5, -135, 0.5, -160)
+main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+main.BorderSizePixel = 2
+main.BorderColor3 = Color3.fromRGB(255, 0, 0)
 main.Parent = gui
 
-Instance.new("UICorner", main).CornerRadius = UDim.new(0, 16)
+-- Header
+local header = Instance.new("Frame")
+header.Size = UDim2.new(1, 0, 0, 22)
+header.BackgroundColor3 = Color3.fromRGB(25, 0, 0)
+header.BorderSizePixel = 1
+header.BorderColor3 = Color3.fromRGB(255, 0, 0)
+header.Parent = main
 
--- Gradient background
-local grad = Instance.new("UIGradient")
-grad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(5, 5, 30)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 5, 40))
-})
-grad.Rotation = 135
-grad.Parent = main
-
--- Bordure brillante
-local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.fromRGB(100, 50, 255)
-stroke.Thickness = 2
-stroke.Parent = main
-
--- Titre
-local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, 50)
-titleBar.BackgroundColor3 = Color3.fromRGB(30, 10, 80)
-titleBar.BorderSizePixel = 0
-titleBar.Parent = main
-Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 16)
-
-local titleGrad = Instance.new("UIGradient")
-titleGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 20, 200)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 80, 255))
-})
-titleGrad.Rotation = 90
-titleGrad.Parent = titleBar
+local leftArrow = Instance.new("TextButton")
+leftArrow.Size = UDim2.new(0, 22, 1, 0)
+leftArrow.BackgroundColor3 = Color3.fromRGB(15, 0, 0)
+leftArrow.BorderSizePixel = 1
+leftArrow.BorderColor3 = Color3.fromRGB(255, 0, 0)
+leftArrow.Text = "<"
+leftArrow.TextColor3 = Color3.fromRGB(255, 255, 255)
+leftArrow.Font = Enum.Font.GothamBold
+leftArrow.TextSize = 13
+leftArrow.Parent = header
 
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, -50, 1, 0)
-titleLabel.Position = UDim2.new(0, 15, 0, 0)
+titleLabel.Size = UDim2.new(1, -44, 1, 0)
+titleLabel.Position = UDim2.new(0, 22, 0, 0)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "🚀 SPACE ADMIN"
+titleLabel.Text = "SPACE ADMIN"
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextSize = 18
-titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-titleLabel.Parent = titleBar
+titleLabel.TextSize = 12
+titleLabel.Parent = header
 
--- Bouton fermer
+local rightArrow = Instance.new("TextButton")
+rightArrow.Size = UDim2.new(0, 22, 1, 0)
+rightArrow.Position = UDim2.new(1, -22, 0, 0)
+rightArrow.BackgroundColor3 = Color3.fromRGB(15, 0, 0)
+rightArrow.BorderSizePixel = 1
+rightArrow.BorderColor3 = Color3.fromRGB(255, 0, 0)
+rightArrow.Text = ">"
+rightArrow.TextColor3 = Color3.fromRGB(255, 255, 255)
+rightArrow.Font = Enum.Font.GothamBold
+rightArrow.TextSize = 13
+rightArrow.Parent = header
+
+-- Close
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 35, 0, 35)
-closeBtn.Position = UDim2.new(1, -43, 0.5, -17)
-closeBtn.BackgroundColor3 = Color3.fromRGB(200, 30, 80)
-closeBtn.Text = "✕"
+closeBtn.Size = UDim2.new(1, 0, 0, 20)
+closeBtn.Position = UDim2.new(0, 0, 1, -20)
+closeBtn.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
+closeBtn.BorderSizePixel = 1
+closeBtn.BorderColor3 = Color3.fromRGB(255, 0, 0)
+closeBtn.Text = "Close"
 closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 16
-closeBtn.BorderSizePixel = 0
-closeBtn.Parent = titleBar
-Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
-
-closeBtn.MouseButton1Click:Connect(function()
-    gui:Destroy()
-end)
-
--- Scroll pour les boutons
-local scroll = Instance.new("ScrollingFrame")
-scroll.Size = UDim2.new(1, -20, 1, -70)
-scroll.Position = UDim2.new(0, 10, 0, 58)
-scroll.BackgroundTransparency = 1
-scroll.BorderSizePixel = 0
-scroll.ScrollBarThickness = 4
-scroll.ScrollBarImageColor3 = Color3.fromRGB(100, 50, 255)
-scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-scroll.Parent = main
-
-local layout = Instance.new("UIListLayout")
-layout.Padding = UDim.new(0, 8)
-layout.Parent = scroll
-
-Instance.new("UIPadding", scroll).PaddingTop = UDim.new(0, 5)
-
--- Fonction créer bouton toggle
-local function createToggle(name, icon, color, callback)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -10, 0, 55)
-    btn.BackgroundColor3 = Color3.fromRGB(15, 10, 40)
-    btn.BorderSizePixel = 0
-    btn.Text = ""
-    btn.Parent = scroll
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
-
-    local btnStroke = Instance.new("UIStroke")
-    btnStroke.Color = Color3.fromRGB(60, 30, 120)
-    btnStroke.Thickness = 1
-    btnStroke.Parent = btn
-
-    local iconLabel = Instance.new("TextLabel")
-    iconLabel.Size = UDim2.new(0, 40, 1, 0)
-    iconLabel.Position = UDim2.new(0, 10, 0, 0)
-    iconLabel.BackgroundTransparency = 1
-    iconLabel.Text = icon
-    iconLabel.TextSize = 24
-    iconLabel.Font = Enum.Font.GothamBold
-    iconLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    iconLabel.Parent = btn
-
-    local nameLabel = Instance.new("TextLabel")
-    nameLabel.Size = UDim2.new(1, -110, 1, 0)
-    nameLabel.Position = UDim2.new(0, 58, 0, 0)
-    nameLabel.BackgroundTransparency = 1
-    nameLabel.Text = name
-    nameLabel.TextSize = 14
-    nameLabel.Font = Enum.Font.GothamBold
-    nameLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
-    nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-    nameLabel.Parent = btn
-
-    local toggle = Instance.new("Frame")
-    toggle.Size = UDim2.new(0, 46, 0, 24)
-    toggle.Position = UDim2.new(1, -56, 0.5, -12)
-    toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-    toggle.BorderSizePixel = 0
-    toggle.Parent = btn
-    Instance.new("UICorner", toggle).CornerRadius = UDim.new(1, 0)
-
-    local circle = Instance.new("Frame")
-    circle.Size = UDim2.new(0, 18, 0, 18)
-    circle.Position = UDim2.new(0, 3, 0.5, -9)
-    circle.BackgroundColor3 = Color3.fromRGB(150, 150, 180)
-    circle.BorderSizePixel = 0
-    circle.Parent = toggle
-    Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 0)
-
-    local active = false
-
-    btn.MouseButton1Click:Connect(function()
-        active = not active
-        if active then
-            toggle.BackgroundColor3 = color
-            circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            circle.Position = UDim2.new(1, -21, 0.5, -9)
-            btnStroke.Color = color
-        else
-            toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-            circle.BackgroundColor3 = Color3.fromRGB(150, 150, 180)
-            circle.Position = UDim2.new(0, 3, 0.5, -9)
-            btnStroke.Color = Color3.fromRGB(60, 30, 120)
-        end
-        callback(active)
-    end)
-
-    return btn
-end
-
--- ========================
--- FEATURES
--- ========================
-
--- 1. FLY
-local flyConn
-createToggle("Fly", "🛸", Color3.fromRGB(100, 50, 255), function(on)
-    local char = LocalPlayer.Character
-    if not char then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if on then
-        hum.PlatformStand = true
-        local bg = Instance.new("BodyGyro", hrp)
-        bg.Name = "FlyGyro"
-        bg.MaxTorque = Vector3.new(1e9,1e9,1e9)
-        bg.D = 100
-        local bv = Instance.new("BodyVelocity", hrp)
-        bv.Name = "FlyVel"
-        bv.MaxForce = Vector3.new(1e9,1e9,1e9)
-        bv.Velocity = Vector3.zero
-        flyConn = RunService.Heartbeat:Connect(function()
-            local cam = workspace.CurrentCamera
-            local vel = Vector3.zero
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then vel = vel + cam.CFrame.LookVector * 60 end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then vel = vel - cam.CFrame.LookVector * 60 end
-            if UserInputService:IsKeyDown(Enum.KeyCode.A) then vel = vel - cam.CFrame.RightVector * 60 end
-            if UserInputService:IsKeyDown(Enum.KeyCode.D) then vel = vel + cam.CFrame.RightVector * 60 end
-            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then vel = vel + Vector3.new(0,60,0) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then vel = vel - Vector3.new(0,60,0) end
-            bv.Velocity = vel
-            bg.CFrame = cam.CFrame
-        end)
-    else
-        hum.PlatformStand = false
-        if flyConn then flyConn:Disconnect() end
-        if hrp:FindFirstChild("FlyGyro") then hrp.FlyGyro:Destroy() end
-        if hrp:FindFirstChild("FlyVel") then hrp.FlyVel:Destroy() end
-    end
-end)
-
--- 2. SPEED
-createToggle("Speed Boost", "⚡", Color3.fromRGB(255, 200, 0), function(on)
-    local char = LocalPlayer.Character
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    if hum then hum.WalkSpeed = on and 80 or 16 end
-end)
-
--- 3. NOCLIP
-local noclipConn
-createToggle("Noclip", "👻", Color3.fromRGB(0, 200, 255), function(on)
-    if on then
-        noclipConn = RunService.Stepped:Connect(function()
-            local char = LocalPlayer.Character
-            if char then
-                for _, v in pairs(char:GetDescendants()) do
-                    if v:IsA("BasePart") then v.CanCollide = false end
-                end
-            end
-        end)
-    else
-        if noclipConn then noclipConn:Disconnect() end
-        local char = LocalPlayer.Character
-        if char then
-            for _, v in pairs(char:GetDescendants()) do
-                if v:IsA("BasePart") then v.CanCollide = true end
-            end
-        end
-    end
-end)
-
--- 4. INFINITE JUMP
-local jumpConn
-createToggle("Infinite Jump", "🌙", Color3.fromRGB(150, 255, 150), function(on)
-    if on then
-        jumpConn = UserInputService.JumpRequest:Connect(function()
-            local char = LocalPlayer.Character
-            local hum = char and char:FindFirstChildOfClass("Humanoid")
-            if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
-        end)
-    else
-        if jumpConn then jumpConn:Disconnect() end
-    end
-end)
-
--- 5. ESP
-local espConn
-createToggle("Player ESP", "🔭", Color3.fromRGB(255, 80, 80), function(on)
-    if on then
-        local function addESP(player)
-            if player == LocalPlayer then return end
-            local char = player.Character
-            if not char then return end
-            local hrp = char:FindFirstChild("HumanoidRootPart")
-            if not hrp then return end
-            local bb = Instance.new("BillboardGui")
-            bb.Name = "ESP"
-            bb.Size = UDim2.new(0, 100, 0, 40)
-            bb.StudsOffset = Vector3.new(0, 3, 0)
-            bb.AlwaysOnTop = true
-            bb.Parent = hrp
-            local lbl = Instance.new("TextLabel")
-            lbl.Size = UDim2.new(1,0,1,0)
-            lbl.BackgroundTransparency = 1
-            lbl.Text = player.Name
-            lbl.TextColor3 = Color3.fromRGB(255, 80, 80)
-            lbl.Font = Enum.Font.GothamBold
-            lbl.TextSize = 14
-            lbl.Parent = bb
-
-            -- Box ESP
-            local hlight = Instance.new("SelectionBox")
-            hlight.Name = "ESPBox"
-            hlight.Color3 = Color3.fromRGB(255, 80, 80)
-            hlight.LineThickness = 0.05
-            hlight.Adornee = char
-            hlight.Parent = char
-        end
-        for _, p in pairs(Players:GetPlayers()) do addESP(p) end
-        espConn = Players.PlayerAdded:Connect(function(p)
-            p.CharacterAdded:Connect(function() task.wait(1) addESP(p) end)
-        end)
-    else
-        if espConn then espConn:Disconnect() end
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character then
-                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-                if hrp and hrp:FindFirstChild("ESP") then hrp.ESP:Destroy() end
-                local box = p.Character:FindFirstChild("ESPBox")
-                if box then box:Destroy() end
-            end
-        end
-    end
-end)
-
--- 6. FULLBRIGHT
-createToggle("Fullbright", "🌟", Color3.fromRGB(255, 255, 100), function(on)
-    game:GetService("Lighting").Brightness = on and 10 or 1
-    game:GetService("Lighting").ClockTime = on and 14 or 14
-    game:GetService("Lighting").FogEnd = on and 1e6 or 1e4
-    game:GetService("Lighting").GlobalShadows = not on
-end)
-
--- 7. JUMP POWER
-createToggle("High Jump", "🪐", Color3.fromRGB(255, 140, 0), function(on)
-    local char = LocalPlayer.Character
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    if hum then hum.JumpPower = on and 120 or 50 end
-end)
-
--- 8. GOD MODE (local)
-createToggle("God Mode (local)", "⭐", Color3.fromRGB(255, 215, 0), function(on)
-    local char = LocalPlayer.Character
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    if hum then
-        hum.MaxHealth = on and math.huge or 100
-        hum.Health = on and math.huge or 100
-    end
-end)
+closeBtn.TextSize = 12
+closeBtn.Parent = main
+closeBtn.MouseButton1Click:Connect(function() gui:Destroy() end)
 
 -- Draggable
 local dragging, dragStart, startPos
-titleBar.InputBegan:Connect(function(input)
+header.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
         dragStart = input.Position
@@ -362,4 +99,296 @@ UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
 end)
 
-print("🚀 Space Admin Panel chargé !")
+-- Créer bouton
+local cols = 3
+local closeH = 20
+local headerH = 22
+local totalH = 320 - headerH - closeH
+local totalW = 270
+local btnNames = {
+    "Fly", "Speed Boost", "Noclip", "Inf Jump",
+    "ESP", "Fullbright", "High Jump", "God Mode",
+    "Toupie", "Ragdoll", "Giga Head", "Invisible",
+    "Super Tiny", "Moonwalk", "Rainbow", "Spawn Bombe",
+    "Sound Play", "Spawn Obby",
+}
+local rows = math.ceil(#btnNames / cols)
+local btnW = math.floor(totalW / cols)
+local btnH = math.floor(totalH / rows)
+
+local toggleStates = {}
+local btnObjects = {}
+
+for i, name in ipairs(btnNames) do
+    local col = (i - 1) % cols
+    local row = math.floor((i - 1) / cols)
+    toggleStates[name] = false
+
+    local btn = Instance.new("TextButton")
+    btn.Name = name
+    btn.Size = UDim2.new(0, btnW, 0, btnH)
+    btn.Position = UDim2.new(0, col * btnW, 0, headerH + row * btnH)
+    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    btn.BorderSizePixel = 1
+    btn.BorderColor3 = Color3.fromRGB(255, 0, 0)
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 10
+    btn.TextWrapped = true
+    btn.Parent = main
+    btnObjects[name] = btn
+
+    btn.MouseButton1Click:Connect(function()
+        toggleStates[name] = not toggleStates[name]
+        local on = toggleStates[name]
+        btn.BackgroundColor3 = on and Color3.fromRGB(120, 0, 0) or Color3.fromRGB(0, 0, 0)
+
+        local char = LocalPlayer.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+
+        -- FLY
+        if name == "Fly" then
+            if on then
+                hum.PlatformStand = true
+                local bg = Instance.new("BodyGyro", hrp)
+                bg.Name = "FlyGyro" bg.MaxTorque = Vector3.new(1e9,1e9,1e9) bg.D = 100
+                local bv = Instance.new("BodyVelocity", hrp)
+                bv.Name = "FlyVel" bv.MaxForce = Vector3.new(1e9,1e9,1e9) bv.Velocity = Vector3.zero
+                flyConn = RunService.Heartbeat:Connect(function()
+                    local cam = workspace.CurrentCamera
+                    local vel = Vector3.zero
+                    local spd = 80
+                    if UserInputService:IsKeyDown(Enum.KeyCode.W) then vel += cam.CFrame.LookVector * spd end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.S) then vel -= cam.CFrame.LookVector * spd end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.A) then vel -= cam.CFrame.RightVector * spd end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.D) then vel += cam.CFrame.RightVector * spd end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then vel += Vector3.new(0,spd,0) end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then vel -= Vector3.new(0,spd,0) end
+                    bv.Velocity = vel
+                    bg.CFrame = cam.CFrame
+                end)
+            else
+                hum.PlatformStand = false
+                if flyConn then flyConn:Disconnect() end
+                if hrp:FindFirstChild("FlyGyro") then hrp.FlyGyro:Destroy() end
+                if hrp:FindFirstChild("FlyVel") then hrp.FlyVel:Destroy() end
+            end
+
+        -- SPEED
+        elseif name == "Speed Boost" then
+            if hum then hum.WalkSpeed = on and 80 or 16 end
+
+        -- NOCLIP
+        elseif name == "Noclip" then
+            if on then
+                noclipConn = RunService.Stepped:Connect(function()
+                    if LocalPlayer.Character then
+                        for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
+                            if v:IsA("BasePart") then v.CanCollide = false end
+                        end
+                    end
+                end)
+            else
+                if noclipConn then noclipConn:Disconnect() end
+                if char then
+                    for _, v in pairs(char:GetDescendants()) do
+                        if v:IsA("BasePart") then v.CanCollide = true end
+                    end
+                end
+            end
+
+        -- INF JUMP
+        elseif name == "Inf Jump" then
+            if on then
+                jumpConn = UserInputService.JumpRequest:Connect(function()
+                    local c = LocalPlayer.Character
+                    local h = c and c:FindFirstChildOfClass("Humanoid")
+                    if h then h:ChangeState(Enum.HumanoidStateType.Jumping) end
+                end)
+            else
+                if jumpConn then jumpConn:Disconnect() end
+            end
+
+        -- ESP
+        elseif name == "ESP" then
+            if on then
+                local function addESP(player)
+                    if player == LocalPlayer then return end
+                    local c = player.Character
+                    if not c then return end
+                    local h = c:FindFirstChild("HumanoidRootPart")
+                    if not h then return end
+                    local bb = Instance.new("BillboardGui")
+                    bb.Name = "ESP" bb.Size = UDim2.new(0,100,0,30)
+                    bb.StudsOffset = Vector3.new(0,3,0) bb.AlwaysOnTop = true bb.Parent = h
+                    local lbl = Instance.new("TextLabel", bb)
+                    lbl.Size = UDim2.new(1,0,1,0) lbl.BackgroundTransparency = 1
+                    lbl.Text = player.Name lbl.TextColor3 = Color3.fromRGB(255,0,0)
+                    lbl.Font = Enum.Font.GothamBold lbl.TextSize = 12
+                    local box = Instance.new("SelectionBox")
+                    box.Name = "ESPBox" box.Color3 = Color3.fromRGB(255,0,0)
+                    box.LineThickness = 0.05 box.Adornee = c box.Parent = c
+                end
+                for _, p in pairs(Players:GetPlayers()) do addESP(p) end
+                espConn = Players.PlayerAdded:Connect(function(p)
+                    p.CharacterAdded:Connect(function() task.wait(1) addESP(p) end)
+                end)
+            else
+                if espConn then espConn:Disconnect() end
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LocalPlayer and p.Character then
+                        local h = p.Character:FindFirstChild("HumanoidRootPart")
+                        if h and h:FindFirstChild("ESP") then h.ESP:Destroy() end
+                        local box = p.Character:FindFirstChild("ESPBox")
+                        if box then box:Destroy() end
+                    end
+                end
+            end
+
+        -- FULLBRIGHT
+        elseif name == "Fullbright" then
+            local l = game:GetService("Lighting")
+            l.Brightness = on and 10 or 1
+            l.GlobalShadows = not on
+            l.FogEnd = on and 1e6 or 1e4
+
+        -- HIGH JUMP
+        elseif name == "High Jump" then
+            if hum then hum.JumpPower = on and 150 or 50 end
+
+        -- GOD MODE
+        elseif name == "God Mode" then
+            if hum then
+                hum.MaxHealth = on and math.huge or 100
+                hum.Health = on and math.huge or 100
+            end
+
+        -- TOUPIE
+        elseif name == "Toupie" then
+            local angle = 0
+            if on then
+                toupieConn = RunService.Heartbeat:Connect(function()
+                    if LocalPlayer.Character then
+                        local h = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                        if h then
+                            angle = angle + 10
+                            h.CFrame = CFrame.new(h.Position) * CFrame.Angles(0, math.rad(angle), 0)
+                        end
+                    end
+                end)
+            else
+                if toupieConn then toupieConn:Disconnect() end
+            end
+
+        -- RAGDOLL
+        elseif name == "Ragdoll" then
+            if hum then hum.PlatformStand = on end
+
+        -- GIGA HEAD
+        elseif name == "Giga Head" then
+            if char then
+                local head = char:FindFirstChild("Head")
+                if head then head.Size = on and Vector3.new(4, 4, 4) or Vector3.new(2, 1, 1) end
+            end
+
+        -- INVISIBLE
+        elseif name == "Invisible" then
+            if char then
+                for _, v in pairs(char:GetDescendants()) do
+                    if v:IsA("BasePart") then v.Transparency = on and 1 or 0 end
+                end
+            end
+
+        -- SUPER TINY
+        elseif name == "Super Tiny" then
+            if hum then hum.BodyDepthScale.Value = on and 0.2 or 1
+                hum.BodyHeightScale.Value = on and 0.2 or 1
+                hum.BodyWidthScale.Value = on and 0.2 or 1
+                hum.HeadScale.Value = on and 0.2 or 1
+            end
+
+        -- MOONWALK
+        elseif name == "Moonwalk" then
+            if on then
+                moonwalkConn = RunService.Heartbeat:Connect(function()
+                    local c = LocalPlayer.Character
+                    local h = c and c:FindFirstChild("HumanoidRootPart")
+                    if h and UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                        h.CFrame = h.CFrame * CFrame.new(0, 0, 0.5)
+                    end
+                end)
+            else
+                if moonwalkConn then moonwalkConn:Disconnect() end
+            end
+
+        -- RAINBOW
+        elseif name == "Rainbow" then
+            if on then
+                rainbowConn = RunService.Heartbeat:Connect(function()
+                    local c = LocalPlayer.Character
+                    if c then
+                        local t = tick()
+                        for _, v in pairs(c:GetDescendants()) do
+                            if v:IsA("BasePart") then
+                                v.Color = Color3.fromHSV((t * 0.5) % 1, 1, 1)
+                            end
+                        end
+                    end
+                end)
+            else
+                if rainbowConn then rainbowConn:Disconnect() end
+            end
+
+        -- SPAWN BOMBE
+        elseif name == "Spawn Bombe" then
+            if hrp then
+                local bomb = Instance.new("Part")
+                bomb.Size = Vector3.new(3,3,3)
+                bomb.Shape = Enum.PartType.Ball
+                bomb.BrickColor = BrickColor.new("Really black")
+                bomb.Position = hrp.Position + Vector3.new(0, 5, 0)
+                bomb.Parent = workspace
+                task.wait(2)
+                local explosion = Instance.new("Explosion")
+                explosion.Position = bomb.Position
+                explosion.BlastRadius = 20
+                explosion.BlastPressure = 1e6
+                explosion.Parent = workspace
+                bomb:Destroy()
+            end
+
+        -- SOUND PLAY
+        elseif name == "Sound Play" then
+            if on then
+                local sound = Instance.new("Sound")
+                sound.SoundId = "rbxassetid://1369158752"
+                sound.Volume = 1
+                sound.Looped = true
+                sound.Name = "AdminSound"
+                sound.Parent = hrp or workspace
+                sound:Play()
+            else
+                local s = (hrp or workspace):FindFirstChild("AdminSound")
+                if s then s:Destroy() end
+            end
+
+        -- SPAWN OBBY
+        elseif name == "Spawn Obby" then
+            if hrp then
+                local pos = hrp.Position + Vector3.new(0, 0, 10)
+                for i = 1, 10 do
+                    local p = Instance.new("Part")
+                    p.Size = Vector3.new(8, 1, 8)
+                    p.Position = pos + Vector3.new(i * 10, i * 4, 0)
+                    p.Anchored = true
+                    p.BrickColor = BrickColor.random()
+                    p.Parent = workspace
+                end
+            end
+        end
+    end)
+end
+
+print("✅ Space Admin chargé !")
