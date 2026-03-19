@@ -3,14 +3,11 @@ local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
--- Nettoyer ancien GUI
 local oldGui = LocalPlayer.PlayerGui:FindFirstChild("SpaceAdmin")
 if oldGui then oldGui:Destroy() end
 
--- Variables features
 local flyConn, noclipConn, jumpConn, espConn, rainbowConn, toupieConn, moonwalkConn
 
--- GUI
 local gui = Instance.new("ScreenGui")
 gui.Name = "SpaceAdmin"
 gui.ResetOnSpawn = false
@@ -25,7 +22,6 @@ main.BorderSizePixel = 2
 main.BorderColor3 = Color3.fromRGB(255, 0, 0)
 main.Parent = gui
 
--- Header
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 22)
 header.BackgroundColor3 = Color3.fromRGB(25, 0, 0)
@@ -48,7 +44,7 @@ local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(1, -44, 1, 0)
 titleLabel.Position = UDim2.new(0, 22, 0, 0)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "SPACE ADMIN"
+titleLabel.Text = "Oxidenn's Panel"
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleLabel.Font = Enum.Font.GothamBold
 titleLabel.TextSize = 12
@@ -66,7 +62,6 @@ rightArrow.Font = Enum.Font.GothamBold
 rightArrow.TextSize = 13
 rightArrow.Parent = header
 
--- Close
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(1, 0, 0, 20)
 closeBtn.Position = UDim2.new(0, 0, 1, -20)
@@ -80,7 +75,6 @@ closeBtn.TextSize = 12
 closeBtn.Parent = main
 closeBtn.MouseButton1Click:Connect(function() gui:Destroy() end)
 
--- Draggable
 local dragging, dragStart, startPos
 header.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -99,7 +93,6 @@ UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
 end)
 
--- Boutons
 local cols = 3
 local closeH = 20
 local headerH = 22
@@ -110,7 +103,7 @@ local btnNames = {
     "ESP", "Fullbright", "High Jump", "God Mode",
     "Toupie", "Ragdoll", "Giga Head", "Invisible",
     "Super Tiny", "Moonwalk", "Rainbow", "Spawn Bombe",
-    "Sound Play", "Spawn Obby",
+    "Sound Play", "Spawn Obby", "SubspaceGun",
 }
 local rows = math.ceil(#btnNames / cols)
 local btnW = math.floor(totalW / cols)
@@ -380,8 +373,21 @@ for i, name in ipairs(btnNames) do
                     p.Parent = workspace
                 end
             end
+
+        elseif name == "SubspaceGun" then
+            -- Clone le gun depuis le Workspace et le met dans ton backpack
+            local tool = workspace:FindFirstChild("SubspaceGun")
+            if tool then
+                local clone = tool:Clone()
+                clone.Parent = LocalPlayer.Backpack
+                btn.BackgroundColor3 = Color3.fromRGB(0, 80, 0)
+                btn.Text = "Gun ✅"
+            else
+                btn.Text = "Introuvable"
+                btn.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+            end
         end
     end)
 end
 
-print("✅ Space Admin chargé !")
+print("✅ Oxidenn's Panel chargé !")
