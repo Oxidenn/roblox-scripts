@@ -7,11 +7,16 @@ while true do
 	local touchingParts = workspace:FindPartBoundsInRadius(script.Parent.Position, 10)
 	
 	for _, part in ipairs(touchingParts) do
-		local humanoidRootPart = part.Parent:FindFirstChild("HumanoidRootPart")
-		
-		if humanoidRootPart then
-			-- Applique une vélocité pour déplacer le joueur
-			humanoidRootPart.AssemblyLinearVelocity = humanoidRootPart.AssemblyLinearVelocity + Vector3.new(conveyorSpeed, 0, 0)
+		if part ~= script.Parent and not part.Parent:FindFirstChildOfClass("Humanoid") then
+			-- Déplace les objets
+			part.AssemblyLinearVelocity = part.AssemblyLinearVelocity + Vector3.new(conveyorSpeed, 0, 0)
+		else
+			local humanoidRootPart = part.Parent:FindFirstChild("HumanoidRootPart")
+			
+			if humanoidRootPart then
+				-- Déplace les joueurs (même s'ils ne marchent pas)
+				humanoidRootPart.AssemblyLinearVelocity = Vector3.new(conveyorSpeed, humanoidRootPart.AssemblyLinearVelocity.Y, humanoidRootPart.AssemblyLinearVelocity.Z)
+			end
 		end
 	end
 	
